@@ -35,9 +35,7 @@ class WebHelper {
 
   ///Download the file from the url
   Stream<FileResponse> downloadFile(String url,
-      {String? key,
-      Map<String, String>? authHeaders,
-      bool ignoreMemCache = false}) {
+      {String? key, Map<String, String>? authHeaders, bool ignoreMemCache = false}) {
     key ??= url;
     var subject = _memCache[key];
     if (subject == null || ignoreMemCache) {
@@ -63,8 +61,7 @@ class WebHelper {
     concurrentCalls++;
     var subject = _memCache[key]!;
     try {
-      await for (var result
-          in _updateFile(url, key, authHeaders: authHeaders)) {
+      await for (var result in _updateFile(url, key, authHeaders: authHeaders)) {
         subject.add(result);
       }
     } catch (e, stackTrace) {
@@ -92,15 +89,14 @@ class WebHelper {
             url,
             key: key,
             validTill: clock.now(),
-            relativePath: '${const Uuid().v1()}.file',
+            relativePath: '${Uuid().v1()}.file',
           )
         : cacheObject.copyWith(url: url);
     final response = await _download(cacheObject, authHeaders);
     yield* _manageResponse(cacheObject, response);
   }
 
-  Future<FileServiceResponse> _download(
-      CacheObject cacheObject, Map<String, String>? authHeaders) {
+  Future<FileServiceResponse> _download(CacheObject cacheObject, Map<String, String>? authHeaders) {
     final headers = <String, String>{};
     if (authHeaders != null) {
       headers.addAll(authHeaders);
@@ -132,8 +128,7 @@ class WebHelper {
       var savedBytes = 0;
       await for (var progress in _saveFile(newCacheObject, response)) {
         savedBytes = progress;
-        yield DownloadProgress(
-            cacheObject.url, response.contentLength, progress);
+        yield DownloadProgress(cacheObject.url, response.contentLength, progress);
       }
       newCacheObject = newCacheObject.copyWith(length: savedBytes);
     }
@@ -155,8 +150,7 @@ class WebHelper {
     );
   }
 
-  CacheObject _setDataFromHeaders(
-      CacheObject cacheObject, FileServiceResponse response) {
+  CacheObject _setDataFromHeaders(CacheObject cacheObject, FileServiceResponse response) {
     final fileExtension = response.fileExtension;
     var filePath = cacheObject.relativePath;
 
@@ -166,7 +160,7 @@ class WebHelper {
         unawaited(_removeOldFile(filePath));
       }
       // Store new file on different path
-      filePath = '${const Uuid().v1()}$fileExtension';
+      filePath = '${Uuid().v1()}$fileExtension';
     }
     return cacheObject.copyWith(
       relativePath: filePath,
@@ -185,10 +179,8 @@ class WebHelper {
     return receivedBytesResultController.stream;
   }
 
-  Future _saveFileAndPostUpdates(
-      StreamController<int> receivedBytesResultController,
-      CacheObject cacheObject,
-      FileServiceResponse response) async {
+  Future _saveFileAndPostUpdates(StreamController<int> receivedBytesResultController,
+      CacheObject cacheObject, FileServiceResponse response) async {
     final file = await _store.fileSystem.createFile(cacheObject.relativePath);
 
     try {
